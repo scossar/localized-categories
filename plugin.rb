@@ -4,31 +4,10 @@
 after_initialize do
 
   ListController.class_eval do
+    alias_method :super_set_category, :set_category
 
     def set_category
-      slug_or_id = params.fetch(:category)
-      parent_slug_or_id = params[:parent_category]
-      id = params[:id].to_i
-
-      parent_category_id = nil
-      if parent_slug_or_id.present?
-        parent_category_id = Category.query_parent_category(parent_slug_or_id)
-        redirect_or_not_found and return if parent_category_id.blank? && !id
-      end
-
-      @category = Category.query_category(slug_or_id, parent_category_id)
-
-
-      # Redirect if we have `/c/:parent_category/:category/:id`
-      if id
-        category = Category.find_by_id(id)
-        (redirect_to category.url, status: 301) && return if category
-      end
-
-      redirect_or_not_found and return if !@category
-
-      @description_meta = @category.description_text
-      raise Discourse::NotFound unless guardian.can_see?(@category)
+      super_set_category
 
       category_sym = @category.name.to_sym
       if I18n.available_locales.include? category_sym
@@ -38,6 +17,8 @@ after_initialize do
   end
 
   TopicsController.class_eval do
+    alias_method :super_show, :show
+
     def show
 
       if params[:topic_id]
