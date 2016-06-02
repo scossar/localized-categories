@@ -18,10 +18,6 @@ after_initialize do
 
       @category = Category.query_category(slug_or_id, parent_category_id)
 
-      category_sym = @category.name.to_sym
-      if I18n.available_locales.include? category_sym
-        I18n.locale = category_sym
-      end
 
       # Redirect if we have `/c/:parent_category/:category/:id`
       if id
@@ -33,11 +29,29 @@ after_initialize do
 
       @description_meta = @category.description_text
       raise Discourse::NotFound unless guardian.can_see?(@category)
+
+      category_sym = @category.name.to_sym
+      if I18n.available_locales.include? category_sym
+        I18n.locale = category_sym
+      end
     end
   end
 
   TopicsController.class_eval do
     def show
+
+      if params[:topic_id]
+        tmp_topic = Topic.find(params[:topic_id])
+      elsif params[:id]
+        tmp_topic = Topic.find_by(slug: params[:id].downcase)
+      end
+      if tmp_topic
+        category_sym = tmp_topic.category.name.to_sym
+        if I18n.available_locales.include? category_sym
+          I18n.locale = category_sym
+        end
+      end
+
       if request.referer
         flash["referer"] ||= request.referer[0..255]
       end
@@ -66,10 +80,6 @@ after_initialize do
         raise Discourse::NotFound
       end
 
-      category_sym = @topic_view.topic.category.name.to_sym
-      if I18n.available_locales.include? category_sym
-        I18n.locale = category_sym
-      end
 
       page = params[:page]
       if (page < 0) || ((page - 1) * @topic_view.chunk_size > @topic_view.topic.highest_post_number)
@@ -107,6 +117,7 @@ after_initialize do
       end
 
       raise ex
+
     end
   end
 end
