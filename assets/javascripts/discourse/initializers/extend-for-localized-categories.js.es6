@@ -2,7 +2,7 @@ import {withPluginApi} from 'discourse/lib/plugin-api';
 import TopicRoute from 'discourse/routes/topic';
 import DiscoveryRoute from 'discourse/routes/discovery';
 import ApplicationRoute from 'discourse/routes/application';
-import showModal from 'discourse/lib/show-modal';
+// import SetCategoryLocale from 'discourse/plugins/localized-categories/discourse/mixins/set-category-locale';
 
 function initializePlugin(api) {
   const siteSettings = api.container.lookup('site-settings:main');
@@ -18,7 +18,8 @@ function initializePlugin(api) {
     },
 
     _localeChanged() {
-      if (I18n.currentLocale() !== defaultLocale) {
+      let user = Discourse.User.current;
+      if (I18n.currentLocale() !== (user.get('locale') || I18n.defaultLocale)) {
         Ember.$('body').addClass('locale-changed');
       } else {
         Ember.$('body').removeClass('locale-changed');
@@ -36,8 +37,12 @@ function initializePlugin(api) {
 
     _localeChanged() {
       let discoveryTopics = this.controllerFor('discovery/topics').get('model');
-      let filter = discoveryTopics.get('filter');
       let catIsLocale = false;
+      let filter;
+
+      if (discoveryTopics) {
+        filter = discoveryTopics.get('filter');
+      }
 
       if (filter) {
         filter = filter.replace('-', '_');
@@ -52,14 +57,14 @@ function initializePlugin(api) {
       }
 
       if (catIsLocale) {
-        console.log('filter', filter);
         if (filter !== I18n.currentLocale().toLowerCase()) {
           Ember.$('body').addClass('locale-changed');
         } else {
           Ember.$('body').removeClass('locale-changed');
         }
       } else {
-        if (I18n.currentLocale() !== defaultLocale) {
+        let user = Discourse.User.current();
+        if (I18n.currentLocale() !== (user.get('locale') || defaultLocale)) {
           Ember.$('body').addClass('locale-changed');
         } else {
           Ember.$('body').removeClass('locale-changed');
@@ -68,7 +73,6 @@ function initializePlugin(api) {
     }
 
   });
-
 
   TopicRoute.reopen({
     actions: {
@@ -81,13 +85,21 @@ function initializePlugin(api) {
     _localeChanged() {
       let currentTopic = this.modelFor('topic');
       if (currentTopic.get('category')) {
-        let categorySlug = currentTopic.get('category.slug').replace('-', '_');
+        let category = currentTopic.get('category');
+
+        if(category.get('parentCategory')) {
+          category = category.get('parentCategory');
+        }
+
+        let categorySlug = category.get('slug').replace('-', '_');
         let catIsLocale = false;
+
         availableLocales.forEach(function (locale) {
           if (locale.toLowerCase() === categorySlug) {
             catIsLocale = true;
           }
         });
+
         if (catIsLocale) {
           if (categorySlug !== I18n.currentLocale()) {
             Ember.$('body').addClass('locale-changed');
@@ -95,7 +107,8 @@ function initializePlugin(api) {
             Ember.$('body').removeClass('locale-changed');
           }
         } else {
-          if (I18n.currentLocale() !== defaultLocale) {
+          let user = Discourse.User.current();
+          if (I18n.currentLocale() !== (user.get('locale') ||  defaultLocale)) {
             Ember.$('body').addClass('locale-changed');
           } else {
             Ember.$('body').removeClass('locale-changed');
@@ -108,9 +121,9 @@ function initializePlugin(api) {
   let refreshMessageStart = 'The site locale has changed. Click here to ';
   let refreshMessageHere = 'refresh page ';
 
-  api.decorateWidget('header:after', helper => {
-    return helper.h('div.wrap.refresh-notice',
-      helper.h('div.refresh', [
+  api.decorateWidget('home-logo:after', helper => {
+    return helper.h('span.refresh-notice',
+      helper.h('span.refresh', [
       refreshMessageStart,
       helper.h('a.refresh-link', {
         href: '#',
