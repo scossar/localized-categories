@@ -8,6 +8,7 @@ function initializePlugin(api) {
   const siteSettings = api.container.lookup('site-settings:main');
   const availableLocales = siteSettings.available_locales.split('|');
   const defaultLocale = I18n.defaultLocale;
+  let updateMessage = 'The site locale is being updated';
 
   const updateLocale = function (categorySlug) {
     categorySlug = categorySlug.replace('-', '_');
@@ -46,88 +47,91 @@ function initializePlugin(api) {
     }
   };
 
-  ApplicationRoute.reopen({
-    actions: {
-      didTransition() {
-        this._localeChanged();
-        this._super();
+  if (siteSettings.localized_categories_enabled) {
+    ApplicationRoute.reopen({
+      actions: {
+        didTransition() {
+          this._localeChanged();
+          this._super();
+        }
+      },
+
+      _localeChanged() {
+        updateUserLocale(Discourse.User.current());
       }
-    },
+    });
 
-    _localeChanged() {
-      updateUserLocale(Discourse.User.current());
-    }
-  });
-  
-  DiscoveryCategoriesRoute.reopen({
-    actions: {
-      didTransition() {
-        this._localeChanged();
-        this._super();
+    DiscoveryCategoriesRoute.reopen({
+      actions: {
+        didTransition() {
+          this._localeChanged();
+          this._super();
+          return true;
+        }
+      },
+
+      _localeChanged() {
+        updateUserLocale(Discourse.User.current());
       }
-    },
-    
-    _localeChanged() {
-      updateUserLocale(Discourse.User.current());
-    }
-  });
+    });
 
-  DiscoveryRoute.reopen({
-    actions: {
-      didTransition() {
-        this._localeChanged();
-        this._super();
-      }
-    },
+    DiscoveryRoute.reopen({
+      actions: {
+        didTransition() {
+          this._localeChanged();
+          this._super();
+        }
+      },
 
-    _localeChanged() {
-      let discoveryTopics = this.controllerFor('discovery/topics').get('model');
-      let filter = null;
+      _localeChanged() {
+        let discoveryTopics = this.controllerFor('discovery/topics').get('model');
+        let filter = null;
 
-      if (discoveryTopics) {
-        filter = discoveryTopics.get('filter');
+        if (discoveryTopics) {
+          filter = discoveryTopics.get('filter');
 
-        if (filter) {
-          if (filter.indexOf('/') !== -1) {
-            filter = filter.split('/')[1]
+          if (filter) {
+            if (filter.indexOf('/') !== -1) {
+              filter = filter.split('/')[1]
+            }
+            updateLocale(filter);
+          } else {
+            updateUserLocale(Discourse.User.current());
           }
-          updateLocale(filter);
         } else {
           updateUserLocale(Discourse.User.current());
         }
-      } else {
-        updateUserLocale(Discourse.User.current());
       }
-    }
-  });
+    });
 
-  TopicRoute.reopen({
-    actions: {
-      didTransition() {
-        this._localeChanged();
-        this._super();
-      }
-    },
-
-    _localeChanged() {
-      let currentTopic = this.modelFor('topic');
-      if (currentTopic.get('category')) {
-        let category = currentTopic.get('category');
-        if (category.get('parentCategory')) {
-          category = category.get('parentCategory');
+    TopicRoute.reopen({
+      actions: {
+        didTransition() {
+          this._localeChanged();
+          this._super();
         }
-        updateLocale(category.get('slug'));
-      }
-    }
-  });
+      },
 
-  api.decorateWidget('header:after', dec => {
-    return dec.h('div.loading-screen', [
-        dec.h('div.loading-message', 'The site locale is being updated.'),
-        dec.h('div.spinner')
-      ]
-    );
-  });
+      _localeChanged() {
+        let currentTopic = this.modelFor('topic');
+        if (currentTopic.get('category')) {
+          let category = currentTopic.get('category');
+          if (category.get('parentCategory')) {
+            category = category.get('parentCategory');
+          }
+          updateLocale(category.get('slug'));
+        }
+      }
+    });
+
+    api.decorateWidget('header:after', dec => {
+      return dec.h('div.loading-screen', [
+          dec.h('div.loading-message', updateMessage),
+          dec.h('div.spinner')
+        ]
+      );
+    });
+  }
 }
 
 export default {
