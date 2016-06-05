@@ -59,6 +59,7 @@ function initializePlugin(api) {
       if (catIsLocale) {
         if (filter !== I18n.currentLocale().toLowerCase()) {
           Ember.$('body').addClass('locale-changed');
+          location.reload(true);
         } else {
           Ember.$('body').removeClass('locale-changed');
         }
@@ -66,6 +67,7 @@ function initializePlugin(api) {
         let user = Discourse.User.current();
         if (I18n.currentLocale() !== (user.get('locale') || defaultLocale)) {
           Ember.$('body').addClass('locale-changed');
+          location.reload(true);
         } else {
           Ember.$('body').removeClass('locale-changed');
         }
@@ -103,6 +105,7 @@ function initializePlugin(api) {
         if (catIsLocale) {
           if (categorySlug !== I18n.currentLocale()) {
             Ember.$('body').addClass('locale-changed');
+            location.reload(true);
           } else {
             Ember.$('body').removeClass('locale-changed');
           }
@@ -110,6 +113,7 @@ function initializePlugin(api) {
           let user = Discourse.User.current();
           if (I18n.currentLocale() !== (user.get('locale') ||  defaultLocale)) {
             Ember.$('body').addClass('locale-changed');
+            location.reload(true);
           } else {
             Ember.$('body').removeClass('locale-changed');
           }
@@ -118,8 +122,8 @@ function initializePlugin(api) {
     }
   });
   
-  let refreshMessageStart = 'The site locale has changed. Click here to ';
-  let refreshMessageHere = 'refresh page ';
+  let refreshMessageStart = 'The site locale has changed. ';
+  let refreshMessageHere = '';
 
   api.decorateWidget('home-logo:after', helper => {
     return helper.h('span.refresh-notice',
