@@ -1,4 +1,4 @@
 plugins:
   localized_categories_enabled:
-    default: false
+    default: true
     client: true
