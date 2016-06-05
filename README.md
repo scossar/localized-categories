@@ -5,9 +5,6 @@
 Follow the [Install a Plugin](https://meta.discourse.org/t/install-a-plugin/19157) howto, using
 `git clone https://github.com/scossar/localized-categories` as the plugin command.
 
-Once you've installed it, review the settings under plugins in the admin section of your
-forum.
-
 ## Use
 
 To create a localized category, create a category and set its slug as one of the forum's
