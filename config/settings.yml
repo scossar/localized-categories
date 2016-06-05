@@ -1,0 +1,4 @@
+plugins:
+  localized_categories_enabled:
+    default: false
+    client: true
