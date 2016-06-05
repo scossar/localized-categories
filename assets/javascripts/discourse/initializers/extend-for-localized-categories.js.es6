@@ -8,6 +8,42 @@ function initializePlugin(api) {
   const availableLocales = siteSettings.available_locales.split('|');
   const defaultLocale = I18n.defaultLocale;
 
+  const updateLocale = function (categorySlug) {
+    categorySlug = categorySlug.replace('-', '_');
+    let isLocale = false;
+    availableLocales.forEach(function (locale) {
+      if (locale.toLowerCase() === categorySlug) {
+        isLocale = true;
+      }
+    });
+
+    if (isLocale) {
+      if (categorySlug !== I18n.currentLocale().toLowerCase()) {
+        Ember.$('body').addClass('locale-reload');
+        location.reload(true);
+      } else {
+        Ember.$('body').removeClass('locale-reload');
+      }
+    } else {
+      let user = Discourse.User.current();
+      if (I18n.currentLocale() !== (user.get('locale') || defaultLocale)) {
+        Ember.$('body').addClass('locale-reload');
+        location.reload(true);
+      } else {
+        Ember.$('body').removeClass('locale-reload');
+      }
+    }
+  };
+
+  const updateUserLocale = function (user) {
+    let userLocale = user.get('locale') || defaultLocale;
+    if (I18n.currentLocale() !== userLocale) {
+      Ember.$('body').addClass('locale-reload');
+    } else {
+      Ember.$('body').removeClass('locale-reload');
+    }
+  };
+
   ApplicationRoute.reopen({
     actions: {
       didTransition() {
@@ -17,12 +53,7 @@ function initializePlugin(api) {
     },
 
     _localeChanged() {
-      let userLocale = Discourse.User.current().get('locale') || defaultLocale;
-      if (I18n.currentLocale() !== userLocale) {
-        Ember.$('body').addClass('locale-reload');
-      } else {
-        Ember.$('body').removeClass('locale-reload');
-      }
+      updateUserLocale(Discourse.User.current());
     }
   });
 
@@ -35,44 +66,24 @@ function initializePlugin(api) {
     },
 
     _localeChanged() {
-      let discoveryTopics = this.controllerFor('discovery/topics').get('model');
-      let catIsLocale = false;
       let filter;
+      let discoveryTopics = this.controllerFor('discovery/topics').get('model');
 
       if (discoveryTopics) {
+        console.log('discovery topics', discoveryTopics);
         filter = discoveryTopics.get('filter');
-      }
 
-      if (filter) {
-        filter = filter.replace('-', '_');
-        if (filter.indexOf('/')) {
-          filter = filter.split('/')[1]
-        }
-        availableLocales.forEach(function (locale) {
-          if (locale.toLowerCase() === filter) {
-            catIsLocale = true;
+        if (filter) {
+          if (filter.indexOf('/')) {
+            filter = filter.split('/')[1]
           }
-        });
-      }
-
-      if (catIsLocale) {
-        if (filter !== I18n.currentLocale().toLowerCase()) {
-          Ember.$('body').addClass('locale-reload');
-          location.reload(true);
-        } else {
-          Ember.$('body').removeClass('locale-reload');
+          console.log('filter', filter);
+          updateLocale(filter);
         }
       } else {
-        let user = Discourse.User.current();
-        if (I18n.currentLocale() !== (user.get('locale') || defaultLocale)) {
-          Ember.$('body').addClass('locale-reload');
-          location.reload(true);
-        } else {
-          Ember.$('body').removeClass('locale-reload');
-        }
+        updateUserLocale(Discourse.User.current());
       }
     }
-
   });
 
   TopicRoute.reopen({
@@ -87,55 +98,13 @@ function initializePlugin(api) {
       let currentTopic = this.modelFor('topic');
       if (currentTopic.get('category')) {
         let category = currentTopic.get('category');
-
         if (category.get('parentCategory')) {
           category = category.get('parentCategory');
         }
-
-        let categorySlug = category.get('slug').replace('-', '_');
-        let catIsLocale = false;
-
-        availableLocales.forEach(function (locale) {
-          if (locale.toLowerCase() === categorySlug) {
-            catIsLocale = true;
-          }
-        });
-
-        if (catIsLocale) {
-          if (categorySlug !== I18n.currentLocale()) {
-            Ember.$('body').addClass('locale-reload');
-            location.reload(true);
-          } else {
-            Ember.$('body').removeClass('locale-reload');
-          }
-        } else {
-          let user = Discourse.User.current();
-          if (I18n.currentLocale() !== (user.get('locale') || defaultLocale)) {
-            Ember.$('body').addClass('locale-reload');
-            location.reload(true);
-          } else {
-            Ember.$('body').removeClass('locale-reload');
-          }
-        }
+        updateLocale(category.get('slug'));
       }
     }
   });
-
-  let refreshMessageStart = 'The site locale has changed. ';
-  let refreshMessageHere = 'here';
-
-  // api.decorateWidget('header:after', helper => {
-  //   return helper.h('span.refresh-notice',
-  //     helper.h('span.refresh', [
-  //     refreshMessageStart,
-  //     helper.h('a.refresh-link', {
-  //       href: '#',
-  //       onclick: function (e) {
-  //         location.reload(true);
-  //         e.preventDefault();
-  //       }
-  //     }, refreshMessageHere)]))
-  // });
 
   api.decorateWidget('header:after', dec => {
     return dec.h('div.loading-screen', [
@@ -143,9 +112,7 @@ function initializePlugin(api) {
         dec.h('div.spinner')
       ]
     );
-
   });
-
 }
 
 export default {
