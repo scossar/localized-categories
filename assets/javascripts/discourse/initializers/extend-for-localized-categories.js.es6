@@ -1,6 +1,7 @@
 import {withPluginApi} from 'discourse/lib/plugin-api';
 import TopicRoute from 'discourse/routes/topic';
 import DiscoveryRoute from 'discourse/routes/discovery';
+import DiscoveryCategoriesRoute from 'discourse/routes/discovery-categories';
 import ApplicationRoute from 'discourse/routes/application';
 
 function initializePlugin(api) {
@@ -57,6 +58,19 @@ function initializePlugin(api) {
       updateUserLocale(Discourse.User.current());
     }
   });
+  
+  DiscoveryCategoriesRoute.reopen({
+    actions: {
+      didTransition() {
+        this._localeChanged();
+        this._super();
+      }
+    },
+    
+    _localeChanged() {
+      updateUserLocale(Discourse.User.current());
+    }
+  });
 
   DiscoveryRoute.reopen({
     actions: {
@@ -71,15 +85,12 @@ function initializePlugin(api) {
       let filter = null;
 
       if (discoveryTopics) {
-        console.log('model', discoveryTopics);
         filter = discoveryTopics.get('filter');
 
         if (filter) {
-          console.log('filter here', filter);
           if (filter.indexOf('/') !== -1) {
             filter = filter.split('/')[1]
           }
-          console.log('updating discovery: filter: ', filter);
           updateLocale(filter);
         } else {
           updateUserLocale(Discourse.User.current());
