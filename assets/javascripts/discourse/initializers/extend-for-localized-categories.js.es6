@@ -13,11 +13,14 @@ function initializePlugin(api) {
     let isLocale = false;
     availableLocales.forEach(function (locale) {
       if (locale.toLowerCase() === categorySlug) {
+        console.log('is locale!!!');
         isLocale = true;
       }
     });
 
     if (isLocale) {
+      console.log('slug', categorySlug);
+      console.log('current locale', I18n.currentLocale().toLowerCase());
       if (categorySlug !== I18n.currentLocale().toLowerCase()) {
         Ember.$('body').addClass('locale-reload');
         location.reload(true);
@@ -36,10 +39,10 @@ function initializePlugin(api) {
   };
 
   const updateUserLocale = function (user) {
-    console.log('stuck in updating user locale');
     let userLocale = user.get('locale') || defaultLocale;
     console.log('default locale', userLocale);
     if (I18n.currentLocale() !== userLocale) {
+      console.log('current locale', I18n.currentLocale());
       Ember.$('body').addClass('locale-reload');
     } else {
       Ember.$('body').removeClass('locale-reload');
@@ -77,11 +80,14 @@ function initializePlugin(api) {
           if (filter.indexOf('/') !== -1) {
             filter = filter.split('/')[1]
           }
+          console.log('updating with filter', filter);
           updateLocale(filter);
         } else {
+          console.log('discovery no filter');
           updateUserLocale(Discourse.User.current());
         }
       } else {
+        console.log('no discovery model');
         updateUserLocale(Discourse.User.current());
       }
     }
