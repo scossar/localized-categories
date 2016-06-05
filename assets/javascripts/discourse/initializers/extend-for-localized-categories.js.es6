@@ -2,7 +2,6 @@ import {withPluginApi} from 'discourse/lib/plugin-api';
 import TopicRoute from 'discourse/routes/topic';
 import DiscoveryRoute from 'discourse/routes/discovery';
 import ApplicationRoute from 'discourse/routes/application';
-// import SetCategoryLocale from 'discourse/plugins/localized-categories/discourse/mixins/set-category-locale';
 
 function initializePlugin(api) {
   const siteSettings = api.container.lookup('site-settings:main');
@@ -18,8 +17,8 @@ function initializePlugin(api) {
     },
 
     _localeChanged() {
-      let user = Discourse.User.current;
-      if (I18n.currentLocale() !== (user.get('locale') || I18n.defaultLocale)) {
+      let userLocale = Discourse.User.current().get('locale') || defaultLocale;
+      if (I18n.currentLocale() !== userLocale) {
         Ember.$('body').addClass('locale-changed');
       } else {
         Ember.$('body').removeClass('locale-changed');
@@ -123,7 +122,7 @@ function initializePlugin(api) {
   });
   
   let refreshMessageStart = 'The site locale has changed. ';
-  let refreshMessageHere = '';
+  let refreshMessageHere = 'here';
 
   api.decorateWidget('home-logo:after', helper => {
     return helper.h('span.refresh-notice',
