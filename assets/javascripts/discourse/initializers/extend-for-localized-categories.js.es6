@@ -36,7 +36,9 @@ function initializePlugin(api) {
   };
 
   const updateUserLocale = function (user) {
+    console.log('stuck in updating user locale');
     let userLocale = user.get('locale') || defaultLocale;
+    console.log('default locale', userLocale);
     if (I18n.currentLocale() !== userLocale) {
       Ember.$('body').addClass('locale-reload');
     } else {
@@ -66,19 +68,18 @@ function initializePlugin(api) {
     },
 
     _localeChanged() {
-      let filter;
       let discoveryTopics = this.controllerFor('discovery/topics').get('model');
 
       if (discoveryTopics) {
-        console.log('discovery topics', discoveryTopics);
-        filter = discoveryTopics.get('filter');
+        let filter = discoveryTopics.get('filter');
 
         if (filter) {
-          if (filter.indexOf('/')) {
+          if (filter.indexOf('/') !== -1) {
             filter = filter.split('/')[1]
           }
-          console.log('filter', filter);
           updateLocale(filter);
+        } else {
+          updateUserLocale(Discourse.User.current());
         }
       } else {
         updateUserLocale(Discourse.User.current());
