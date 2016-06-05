@@ -9,17 +9,18 @@ after_initialize do
     def set_tmp_locale cat
       if parent_cat_id = cat.parent_category_id
         parent_cat = Category.find parent_cat_id
-        parent_sym = parent_cat.name.to_sym
-        locale_from_sym parent_sym
+        slug = parent_cat.slug
+        locale_from_slug slug
       else
-        cat_sym = cat.name.to_sym
-        locale_from_sym cat_sym
+        locale_from_slug cat.slug
       end
     end
 
-    def locale_from_sym sym
-      if I18n.available_locales.include? sym
-        I18n.locale = sym
+    def locale_from_slug slug
+      I18n.available_locales.each do |locale|
+        if locale.to_s.downcase == slug.gsub('-', '_')
+          I18n.locale = locale
+        end
       end
     end
 
