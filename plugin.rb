@@ -1,5 +1,10 @@
 # name: localized-categories
-# about: sets the locale for categories that share the name of an available locale
+# about: sets the locale for categories and subcategories based on category slug
+# version: 0.1
+# authors: scossar
+# url: https://github.com/scossar/localized-categories
+
+enabled_site_setting :localized_categories_enabled
 
 register_asset 'stylesheets/category-locale.scss'
 
@@ -32,7 +37,10 @@ after_initialize do
 
     def set_category
       super_set_category
-      set_tmp_locale @category
+
+      if SiteSetting.localized_categories_enabled
+        set_tmp_locale @category
+      end
     end
   end
 
@@ -41,13 +49,15 @@ after_initialize do
     alias_method :super_show, :show
 
     def show
-      if params[:topic_id]
-        topic = Topic.find(params[:topic_id])
-      elsif params[:id]
-        topic = Topic.find_by(slug: params[:id].downcase)
-      end
-      if topic
-        set_tmp_locale topic.category
+      if SiteSetting.localized_categories_enabled
+        if params[:topic_id]
+          topic = Topic.find(params[:topic_id])
+        elsif params[:id]
+          topic = Topic.find_by(slug: params[:id].downcase)
+        end
+        if topic
+          set_tmp_locale topic.category
+        end
       end
 
       super_show
