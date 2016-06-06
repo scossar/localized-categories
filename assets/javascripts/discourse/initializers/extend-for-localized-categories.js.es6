@@ -27,8 +27,9 @@ function initializePlugin(api) {
         Ember.$('body').removeClass('locale-reload');
       }
     } else {
-      let user = Discourse.User.current();
-      if (I18n.currentLocale() !== (user.get('locale') || defaultLocale)) {
+      let user = Discourse.User.current() ? Discourse.User.current : null;
+      let userLocale = user ? user.get('locale') : defaultLocale;
+      if (I18n.currentLocale() !== userLocale) {
         Ember.$('body').addClass('locale-reload');
         location.reload(true);
       } else {
@@ -38,7 +39,8 @@ function initializePlugin(api) {
   };
 
   const updateUserLocale = function (user) {
-    let userLocale = user.get('locale') || defaultLocale;
+    
+    let userLocale = user ? user.get('locale') : defaultLocale;
     if (I18n.currentLocale() !== userLocale) {
       Ember.$('body').addClass('locale-reload');
       location.reload(true);
