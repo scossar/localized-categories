@@ -27,14 +27,7 @@ function initializePlugin(api) {
         Ember.$('body').removeClass('locale-reload');
       }
     } else {
-      let user = Discourse.User.current() ? Discourse.User.current : null;
-      let userLocale = user ? user.get('locale') : defaultLocale;
-      if (I18n.currentLocale() !== userLocale) {
-        Ember.$('body').addClass('locale-reload');
-        location.reload(true);
-      } else {
-        Ember.$('body').removeClass('locale-reload');
-      }
+      updateUserLocale(Discourse.User.current());
     }
   };
 
