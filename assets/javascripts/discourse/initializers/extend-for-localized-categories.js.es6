@@ -32,9 +32,8 @@ function initializePlugin(api) {
   };
 
   const updateUserLocale = function (user) {
-    
     let userLocale = user ? user.get('locale') : defaultLocale;
-    if (I18n.currentLocale() !== userLocale) {
+    if (userLocale && (I18n.currentLocale() !== userLocale)) {
       Ember.$('body').addClass('locale-reload');
       location.reload(true);
     } else {
