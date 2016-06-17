@@ -88,10 +88,9 @@ function initializePlugin(api) {
 
       _localeChanged() {
         let discoveryTopics = this.controllerFor('discovery/topics').get('model');
-        let filter = null;
-
+        
         if (discoveryTopics) {
-          filter = discoveryTopics.get('filter');
+          let filter = discoveryTopics.get('filter');
 
           if (filter) {
             if (filter.indexOf('/') !== -1) {
