@@ -10,35 +10,43 @@ function initializePlugin(api) {
   const defaultLocale = I18n.defaultLocale;
   let updateMessage = 'The site locale is being updated';
 
-  const updateLocale = function (categorySlug) {
-    categorySlug = categorySlug.replace('-', '_');
-    let isLocale = false;
-    availableLocales.forEach(function (locale) {
-      if (locale.toLowerCase() === categorySlug) {
-        isLocale = true;
-      }
-    });
+  const updateLocale = function (categorySlug, user) {
+    // Don't update the locale if there isn't a logged in user.
+    if (user) {
 
-    if (isLocale) {
-      if (categorySlug !== I18n.currentLocale().toLowerCase()) {
+      // Test if the category is a locale.
+      categorySlug = categorySlug.replace('-', '_');
+      let isLocale = false;
+      availableLocales.forEach(function (locale) {
+        if (locale.toLowerCase() === categorySlug) {
+          isLocale = true;
+        }
+      });
+
+      if (isLocale) {
+        if (categorySlug !== I18n.currentLocale().toLowerCase()) {
+          Ember.$('body').addClass('locale-reload');
+          location.reload(true);
+        } else {
+          Ember.$('body').removeClass('locale-reload');
+        }
+      } else {
+        // The category isn't a locale. Update the locale to the user's locale.
+        updateUserLocale(user);
+      }
+    }
+  };
+
+  const updateUserLocale = function (user) {
+    if (user) {
+      let userLocale = user.locale;
+      userLocale = userLocale ? userLocale : defaultLocale;
+      if (I18n.currentLocale() !== userLocale) {
         Ember.$('body').addClass('locale-reload');
         location.reload(true);
       } else {
         Ember.$('body').removeClass('locale-reload');
       }
-    } else {
-      updateUserLocale(Discourse.User.current());
-    }
-  };
-
-  const updateUserLocale = function (user) {
-    // todo: fix this
-    let userLocale = defaultLocale;
-    if (userLocale && (I18n.currentLocale() !== userLocale)) {
-      Ember.$('body').addClass('locale-reload');
-      location.reload(true);
-    } else {
-      Ember.$('body').removeClass('locale-reload');
     }
   };
 
@@ -89,12 +97,8 @@ function initializePlugin(api) {
             if (filter.indexOf('/') !== -1) {
               filter = filter.split('/')[1]
             }
-            updateLocale(filter);
-          } else {
-            updateUserLocale(Discourse.User.current());
+            updateLocale(filter, Discourse.User.current());
           }
-        } else {
-          updateUserLocale(Discourse.User.current());
         }
       }
     });
@@ -114,7 +118,7 @@ function initializePlugin(api) {
           if (category.get('parentCategory')) {
             category = category.get('parentCategory');
           }
-          updateLocale(category.get('slug'));
+          updateLocale(category.get('slug'), Discourse.User.current());
         }
       }
     });
