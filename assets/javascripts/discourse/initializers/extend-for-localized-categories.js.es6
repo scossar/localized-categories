@@ -7,14 +7,9 @@ import ApplicationRoute from 'discourse/routes/application';
 function initializePlugin(api) {
   const siteSettings = api.container.lookup('site-settings:main');
   const availableLocales = siteSettings.available_locales.split('|');
-  const defaultLocale = I18n.defaultLocale;
   let updateMessage = 'The site locale is being updated';
 
-  const updateLocale = function (categorySlug, user) {
-    // Don't update the locale if there isn't a logged in user.
-    if (user) {
-
-      // Test if the category is a locale.
+  const updateLocaleForCategory = function (categorySlug) {
       categorySlug = categorySlug.replace('-', '_');
       let isLocale = false;
       availableLocales.forEach(function (locale) {
@@ -25,28 +20,22 @@ function initializePlugin(api) {
 
       if (isLocale) {
         if (categorySlug !== I18n.currentLocale().toLowerCase()) {
+          // Ember.$('body').addClass('locale-reload locale-changed');
           Ember.$('body').addClass('locale-reload');
           location.reload(true);
         } else {
+          Ember.$('body').addClass('locale-changed');
           Ember.$('body').removeClass('locale-reload');
         }
       } else {
-        // The category isn't a locale. Update the locale to the user's locale.
-        updateUserLocale(user);
+        restoreLocale();
       }
-    }
   };
 
-  const updateUserLocale = function (user) {
-    if (user) {
-      let userLocale = user.locale;
-      userLocale = userLocale ? userLocale : defaultLocale;
-      if (I18n.currentLocale() !== userLocale) {
-        Ember.$('body').addClass('locale-reload');
-        location.reload(true);
-      } else {
-        Ember.$('body').removeClass('locale-reload');
-      }
+  const restoreLocale = function () {
+    if ( Ember.$('body').hasClass('locale-changed')) {
+      Ember.$('body').addClass('locale-reload');
+      location.reload(true);
     }
   };
 
@@ -60,7 +49,7 @@ function initializePlugin(api) {
       },
 
       _localeChanged() {
-        updateUserLocale(Discourse.User.current());
+        restoreLocale();
       }
     });
 
@@ -74,7 +63,7 @@ function initializePlugin(api) {
       },
 
       _localeChanged() {
-        updateUserLocale(Discourse.User.current());
+        restoreLocale();
       }
     });
 
@@ -88,7 +77,7 @@ function initializePlugin(api) {
 
       _localeChanged() {
         let discoveryTopics = this.controllerFor('discovery/topics').get('model');
-        
+
         if (discoveryTopics) {
           let filter = discoveryTopics.get('filter');
 
@@ -96,7 +85,7 @@ function initializePlugin(api) {
             if (filter.indexOf('/') !== -1) {
               filter = filter.split('/')[1]
             }
-            updateLocale(filter, Discourse.User.current());
+            updateLocaleForCategory(filter);
           }
         }
       }
@@ -117,7 +106,7 @@ function initializePlugin(api) {
           if (category.get('parentCategory')) {
             category = category.get('parentCategory');
           }
-          updateLocale(category.get('slug'), Discourse.User.current());
+          updateLocaleForCategory(category.slug);
         }
       }
     });
