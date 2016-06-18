@@ -20,12 +20,11 @@ function initializePlugin(api) {
 
       if (isLocale) {
         if (categorySlug !== I18n.currentLocale().toLowerCase()) {
-          // Ember.$('body').addClass('locale-reload locale-changed');
           Ember.$('body').addClass('locale-reload');
           location.reload(true);
         } else {
           Ember.$('body').addClass('locale-changed');
-          Ember.$('body').removeClass('locale-reload');
+          // Ember.$('body').removeClass('locale-reload');
         }
       } else {
         restoreLocale();
