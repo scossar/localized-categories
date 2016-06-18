@@ -9,7 +9,22 @@ function initializePlugin(api) {
   const availableLocales = siteSettings.available_locales.split('|');
   let updateMessage = 'The site locale is being updated';
 
+  const updateLocaleForUser = function () {
+    if (Discourse.User.current()) {
+      let username = Discourse.User.current().get('username');
+      api.container.lookup('store:main').find('user', username).then(function (user) {
+        let userLocale = user.get('locale');
+        userLocale = userLocale ? userLocale : I18n.defaultLocale;
+        if (I18n.locale !== userLocale) {
+          Ember.$('body').addClass('locale-reload');
+          location.reload(true);
+        }
+      });
+    }
+  };
+
   const updateLocaleForCategory = function (categorySlug) {
+    if (Discourse.User.current()) {
       categorySlug = categorySlug.replace('-', '_');
       let isLocale = false;
       availableLocales.forEach(function (locale) {
@@ -19,105 +34,97 @@ function initializePlugin(api) {
       });
 
       if (isLocale) {
-        if (categorySlug !== I18n.currentLocale().toLowerCase()) {
+        if (categorySlug !== I18n.locale.toLowerCase()) {
           Ember.$('body').addClass('locale-reload');
           location.reload(true);
-        } else {
-          Ember.$('body').addClass('locale-changed');
-          // Ember.$('body').removeClass('locale-reload');
         }
       } else {
-        restoreLocale();
+        updateLocaleForUser();
       }
-  };
-
-  const restoreLocale = function () {
-    if ( Ember.$('body').hasClass('locale-changed')) {
-      Ember.$('body').addClass('locale-reload');
-      location.reload(true);
     }
   };
 
-  if (siteSettings.localized_categories_enabled) {
-    ApplicationRoute.reopen({
-      actions: {
-        didTransition() {
-          this._localeChanged();
-          this._super();
-        }
-      },
-
-      _localeChanged() {
-        restoreLocale();
+  TopicRoute.reopen({
+    actions: {
+      didTransition() {
+        this._didTransition();
+        this._super();
       }
-    });
+    },
 
-    DiscoveryCategoriesRoute.reopen({
-      actions: {
-        didTransition() {
-          this._localeChanged();
-          this._super();
-          return true;
+    _didTransition() {
+      let topicModel = this.get('controller.model');
+
+      if (topicModel.get('category')) {
+        let category = topicModel.get('category');
+        if (category.get('parentCategory')) {
+          category = category.get('parentCategory');
         }
-      },
 
-      _localeChanged() {
-        restoreLocale();
+        let categorySlug = category.get('slug');
+        updateLocaleForCategory(categorySlug);
       }
-    });
+    }
+  });
 
-    DiscoveryRoute.reopen({
-      actions: {
-        didTransition() {
-          this._localeChanged();
-          this._super();
-        }
-      },
+  DiscoveryRoute.reopen({
+    actions: {
+      didTransition() {
+        this._didTransition();
+        this._super();
+      }
+    },
 
-      _localeChanged() {
-        let discoveryTopics = this.controllerFor('discovery/topics').get('model');
+    _didTransition() {
+      let discoveryTopics = this.controllerFor('discovery/topics').get('model');
 
-        if (discoveryTopics) {
-          let filter = discoveryTopics.get('filter');
+      if (discoveryTopics) {
+        let filter = discoveryTopics.get('filter');
 
-          if (filter) {
-            if (filter.indexOf('/') !== -1) {
-              filter = filter.split('/')[1]
-            }
-            updateLocaleForCategory(filter);
+        if (filter) {
+          if (filter.indexOf('/') !== -1) {
+            filter = filter.split('/')[1]
           }
+          updateLocaleForCategory(filter);
         }
       }
-    });
+    }
+  });
 
-    TopicRoute.reopen({
-      actions: {
-        didTransition() {
-          this._localeChanged();
-          this._super();
-        }
-      },
-
-      _localeChanged() {
-        let currentTopic = this.modelFor('topic');
-        if (currentTopic.get('category')) {
-          let category = currentTopic.get('category');
-          if (category.get('parentCategory')) {
-            category = category.get('parentCategory');
-          }
-          updateLocaleForCategory(category.slug);
-        }
+  DiscoveryCategoriesRoute.reopen({
+    actions: {
+      didTransition() {
+        this._didTransition();
+        this._super();
+        return true;
       }
-    });
+    },
 
-    api.decorateWidget('header:after', dec => {
-      return dec.h('div.loading-screen', [
-          dec.h('div.loading-message', updateMessage),
-          dec.h('div.spinner')
-        ]
-      );
-    });
-  }
+    _didTransition() {
+      updateLocaleForUser();
+    }
+  });
+
+  ApplicationRoute.reopen({
+    actions: {
+      didTransition() {
+        this._didTransition();
+        this._super();
+      }
+    },
+
+    _didTransition() {
+      updateLocaleForUser();
+    }
+  });
+
+  api.decorateWidget('header:after', dec => {
+    return dec.h('div.loading-screen', [
+        dec.h('div.loading-message', updateMessage),
+        dec.h('div.spinner')
+      ]
+    );
+  });
 }
 
 export default {
