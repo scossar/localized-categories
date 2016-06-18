@@ -53,7 +53,7 @@ function initializePlugin(api) {
     },
 
     _didTransition() {
-      let topicModel = this.get('controller.model');
+      let topicModel = this.modelFor('topic');
 
       if (topicModel.get('category')) {
         let category = topicModel.get('category');
@@ -63,6 +63,22 @@ function initializePlugin(api) {
 
         let categorySlug = category.get('slug');
         updateLocaleForCategory(categorySlug);
+      } else {
+        let topicId = topicModel.get('id');
+        if (topicId) {
+
+          Discourse.ajax('/t/' + topicId).then(function (result) {
+            let categoryId = result.category_id;
+            if (categoryId) {
+              let category = Discourse.Category.findById(categoryId);
+              if (category.get('parentCategory')) {
+                category = category.get('parentCategory');
+              }
+              let categorySlug = category.get('slug');
+              updateLocaleForCategory(categorySlug);
+            }
+          });
+        }
       }
     }
   });
