@@ -1,5 +1,7 @@
 # Discourse Localized Categories
 
+**Note:** this plugin does not work with the latest version of Discourse. If you would like to use it, please get in touch with me.
+
 ## Installation
 
 Follow the [Install a Plugin](https://meta.discourse.org/t/install-a-plugin/19157) howto, using
