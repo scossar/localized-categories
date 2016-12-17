@@ -1,4 +1,6 @@
-/*import {withPluginApi} from 'discourse/lib/plugin-api';
+import {withPluginApi} from 'discourse/lib/plugin-api';
+import {ajax} from 'discourse/lib/ajax';
+import {popupAjaxError} from 'discourse/lib/ajax-error';
 import TopicRoute from 'discourse/routes/topic';
 import DiscoveryRoute from 'discourse/routes/discovery';
 import DiscoveryCategoriesRoute from 'discourse/routes/discovery-categories';
@@ -67,7 +69,7 @@ function initializePlugin(api) {
         let topicId = topicModel.get('id');
         if (topicId) {
 
-          Discourse.ajax('/t/' + topicId).then(function (result) {
+          ajax('/t/' + topicId).then(function (result) {
             let categoryId = result.category_id;
             if (categoryId) {
               let category = Discourse.Category.findById(categoryId);
@@ -77,7 +79,7 @@ function initializePlugin(api) {
               let categorySlug = category.get('slug');
               updateLocaleForCategory(categorySlug);
             }
-          });
+          }).catch(popupAjaxError);
         }
       }
     }
@@ -141,11 +143,11 @@ function initializePlugin(api) {
       ]
     );
   });
-} */
+}
 
 export default {
   name: 'extend-for-localized-categories',
   initialize() {
-  //   withPluginApi('0.1', api => initializePlugin(api));
+    withPluginApi('0.5', api => initializePlugin(api));
   }
 }
