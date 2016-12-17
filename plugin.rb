@@ -29,6 +29,11 @@ after_initialize do
       end
     end
 
+    def allow_tmp_locale? (user)
+      # Todo: This has to be checked on the front-end as well. Allow localized categories for all anonymous users for now.
+      # SiteSetting.localized_categories_enabled && (user || SiteSetting.localized_categories_allow_anonymous_users)
+      SiteSetting.localized_categories_enabled
+    end
   end
 
   ListController.class_eval do
@@ -38,7 +43,7 @@ after_initialize do
     def set_category
       super_set_category
 
-      if @category && SiteSetting.localized_categories_enabled
+      if @category && allow_tmp_locale?(current_user)
         set_tmp_locale @category
       end
     end
@@ -49,7 +54,7 @@ after_initialize do
     alias_method :super_show, :show
 
     def show
-      if SiteSetting.localized_categories_enabled
+      if allow_tmp_locale?(current_user)
         if params[:topic_id]
           topic = Topic.find(params[:topic_id])
         elsif params[:id]
@@ -57,6 +62,8 @@ after_initialize do
         end
         if topic && topic.category_id
           set_tmp_locale topic.category
+        else
+          # It's a private message. Probably the locale should not be changed.
         end
       end
 

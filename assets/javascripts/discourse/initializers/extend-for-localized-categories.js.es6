@@ -22,27 +22,28 @@ function initializePlugin(api) {
           location.reload(true);
         }
       });
+    } else if (I18n.defaultLocale !== I18n.locale) {
+      Ember.$('body').addClass('locale-reload');
+      location.reload(true);
     }
   };
 
   const updateLocaleForCategory = function (categorySlug) {
-    if (Discourse.User.current()) {
-      categorySlug = categorySlug.replace('-', '_');
-      let isLocale = false;
-      availableLocales.forEach(function (locale) {
-        if (locale.toLowerCase() === categorySlug) {
-          isLocale = true;
-        }
-      });
-
-      if (isLocale) {
-        if (categorySlug !== I18n.locale.toLowerCase()) {
-          Ember.$('body').addClass('locale-reload');
-          location.reload(true);
-        }
-      } else {
-        updateLocaleForUser();
+    categorySlug = categorySlug.replace('-', '_');
+    let isLocale = false;
+    availableLocales.forEach(function (locale) {
+      if (locale.toLowerCase() === categorySlug) {
+        isLocale = true;
       }
+    });
+
+    if (isLocale) {
+      if (categorySlug !== I18n.locale.toLowerCase()) {
+        Ember.$('body').addClass('locale-reload');
+        location.reload(true);
+      }
+    } else {
+      updateLocaleForUser();
     }
   };
 

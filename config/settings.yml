@@ -2,3 +2,6 @@ plugins:
   localized_categories_enabled:
     default: true
     client: true
+  localized_categories_allow_anonymous_users:
+    default: true
+    client: true

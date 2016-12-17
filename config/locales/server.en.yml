@@ -1,3 +1,4 @@
 en:
   site_settings:
     localized_categories_enabled: "Enable localized categories?"
+    localized_categories_allow_anonymous_users: "Allow localized categories for anonymous users?"
