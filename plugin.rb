@@ -38,7 +38,7 @@ after_initialize do
     def set_category
       super_set_category
 
-      if SiteSetting.localized_categories_enabled
+      if @category && SiteSetting.localized_categories_enabled
         set_tmp_locale @category
       end
     end
@@ -55,7 +55,7 @@ after_initialize do
         elsif params[:id]
           topic = Topic.find_by(slug: params[:id].downcase)
         end
-        if topic
+        if topic && topic.category_id
           set_tmp_locale topic.category
         end
       end
