@@ -1,4 +1,4 @@
-import {withPluginApi} from 'discourse/lib/plugin-api';
+/*import {withPluginApi} from 'discourse/lib/plugin-api';
 import TopicRoute from 'discourse/routes/topic';
 import DiscoveryRoute from 'discourse/routes/discovery';
 import DiscoveryCategoriesRoute from 'discourse/routes/discovery-categories';
@@ -141,11 +141,11 @@ function initializePlugin(api) {
       ]
     );
   });
-}
+} */
 
 export default {
   name: 'extend-for-localized-categories',
   initialize() {
-    withPluginApi('0.1', api => initializePlugin(api));
+  //   withPluginApi('0.1', api => initializePlugin(api));
   }
 }
