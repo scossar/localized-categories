@@ -50,7 +50,7 @@ function initializePlugin(api) {
 
   api.decorateWidget('home-logo:after', dec => {
     if (isLocalizedCategory) {
-      let categorySlug = I18n.locale.replace('-', '_').toLowerCase();
+      let categorySlug = I18n.locale.replace('_', '-').toLowerCase();
       return dec.h('div.localized-category-link', [
         dec.h('a', {attributes: {href: '/c/' + categorySlug}}, `${I18n.t('localized_categories_category_link_text')}`)
       ]);
