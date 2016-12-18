@@ -1,6 +1,6 @@
 # name: localized-categories
 # about: sets the locale for categories and subcategories based on category slug
-# version: 0.1
+# version: 0.1.5
 # authors: scossar
 # url: https://github.com/scossar/localized-categories
 
@@ -30,9 +30,7 @@ after_initialize do
     end
 
     def allow_tmp_locale? (user)
-      # Todo: This has to be checked on the front-end as well. Allow localized categories for all anonymous users for now.
-      # SiteSetting.localized_categories_enabled && (user || SiteSetting.localized_categories_allow_anonymous_users)
-      SiteSetting.localized_categories_enabled
+      SiteSetting.localized_categories_enabled && (user || SiteSetting.localized_categories_allow_anonymous_users)
     end
   end
 
