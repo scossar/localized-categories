@@ -48,12 +48,19 @@ function initializePlugin(api) {
     }
   };
 
-  api.decorateWidget('home-logo:after', dec => {
+  api.decorateWidget('header:after', dec => {
     if (isLocalizedCategory) {
+      Ember.$('body').addClass('is-localized-category');
       let categorySlug = I18n.locale.replace('_', '-').toLowerCase();
       return dec.h('div.localized-category-link', [
-        dec.h('a', {attributes: {href: '/c/' + categorySlug}}, `${I18n.t('localized_categories_category_link_text')}`)
-      ]);
+        dec.h('div.wrap', [
+          dec.h('ul.nav.nav-pills', [
+            dec.h('li', [
+              dec.h('a', {attributes: {href: '/c/' + categorySlug}}, `${I18n.t('localized_categories_category_link_text')}`)
+            ])
+          ])
+        ])
+      ])
     }
   });
 
