@@ -9,7 +9,8 @@ import ApplicationRoute from 'discourse/routes/application';
 function initializePlugin(api) {
   const siteSettings = api.container.lookup('site-settings:main');
   const availableLocales = siteSettings.available_locales.split('|');
-  let updateMessage = 'The site locale is being updated';
+  let newLocale = I18n.defaultLocale;
+  let isLocalizedCategory = false;
 
   const updateLocaleForUser = function () {
     if (Discourse.User.current()) {
@@ -28,16 +29,16 @@ function initializePlugin(api) {
     }
   };
 
-  const updateLocaleForCategory = function (categorySlug) {
-    categorySlug = categorySlug.replace('-', '_');
-    let isLocale = false;
+  const updateLocaleForCategory = function (slug) {
+    let categorySlug = slug.replace('-', '_');
+    // let isLocale = false;
     availableLocales.forEach(function (locale) {
       if (locale.toLowerCase() === categorySlug) {
-        isLocale = true;
+        isLocalizedCategory = true;
       }
     });
 
-    if (isLocale) {
+    if (isLocalizedCategory) {
       if (categorySlug !== I18n.locale.toLowerCase()) {
         Ember.$('body').addClass('locale-reload');
         location.reload(true);
@@ -46,6 +47,21 @@ function initializePlugin(api) {
       updateLocaleForUser();
     }
   };
+
+  api.decorateWidget('home-logo:after', dec => {
+    return dec.h('div.localized-category-link', [
+      dec.h('a', {attributes: {href: '/c/fr'}}, 'french')
+    ]);
+  });
+
+  api.decorateWidget('header:after', dec => {
+    console.log('locale', I18n.locale);
+    return dec.h('div.loading-screen', [
+        dec.h('div.loading-message', `${I18n.t('localized_categories_update_message')}`),
+        dec.h('i.fa.fa-globe', {attributes: {'aria-hidden': true}})
+      ]
+    );
+  });
 
   TopicRoute.reopen({
     actions: {
@@ -137,13 +153,6 @@ function initializePlugin(api) {
     }
   });
 
-  api.decorateWidget('header:after', dec => {
-    return dec.h('div.loading-screen', [
-        dec.h('div.loading-message', updateMessage),
-        dec.h('div.spinner')
-      ]
-    );
-  });
 }
 
 export default {
