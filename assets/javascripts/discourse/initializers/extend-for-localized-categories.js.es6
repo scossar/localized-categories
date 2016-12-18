@@ -9,7 +9,6 @@ import ApplicationRoute from 'discourse/routes/application';
 function initializePlugin(api) {
   const siteSettings = api.container.lookup('site-settings:main');
   const availableLocales = siteSettings.available_locales.split('|');
-  let newLocale = I18n.defaultLocale;
   let isLocalizedCategory = false;
 
   const updateLocaleForUser = function () {
@@ -23,28 +22,29 @@ function initializePlugin(api) {
           location.reload(true);
         }
       });
-    } else if (I18n.defaultLocale !== I18n.locale) {
+    } else if (I18n.defaultLocale !== I18n.locale && siteSettings.localized_categories_allow_anonymous_users) {
       Ember.$('body').addClass('locale-reload');
       location.reload(true);
     }
   };
 
   const updateLocaleForCategory = function (slug) {
-    let categorySlug = slug.replace('-', '_');
-    // let isLocale = false;
-    availableLocales.forEach(function (locale) {
-      if (locale.toLowerCase() === categorySlug) {
-        isLocalizedCategory = true;
-      }
-    });
+    if (Discourse.User.current() || siteSettings.localized_categories_allow_anonymous_users) {
+      let categorySlug = slug.replace('-', '_');
+      availableLocales.forEach(function (locale) {
+        if (locale.toLowerCase() === categorySlug) {
+          isLocalizedCategory = true;
+        }
+      });
 
-    if (isLocalizedCategory) {
-      if (categorySlug !== I18n.locale.toLowerCase()) {
-        Ember.$('body').addClass('locale-reload');
-        location.reload(true);
+      if (isLocalizedCategory) {
+        if (categorySlug !== I18n.locale.toLowerCase()) {
+          Ember.$('body').addClass('locale-reload');
+          location.reload(true);
+        }
+      } else {
+        updateLocaleForUser();
       }
-    } else {
-      updateLocaleForUser();
     }
   };
 
