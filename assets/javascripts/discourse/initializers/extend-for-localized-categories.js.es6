@@ -22,7 +22,10 @@ function initializePlugin(api) {
           location.reload(true);
         }
       });
-    } else if (I18n.defaultLocale !== I18n.locale && siteSettings.localized_categories_allow_anonymous_users) {
+    } else if (I18n.defaultLocale !== I18n.locale
+      && siteSettings.localized_categories_allow_anonymous_users
+        // allow_user_locale will cause the site to reload continuously. This setting isn't currently available on the client.
+      && !siteSettings.set_locale_from_accept_language_header) {
       Ember.$('body').addClass('locale-reload');
       location.reload(true);
     }
