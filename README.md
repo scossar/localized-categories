@@ -28,6 +28,9 @@ The plugin isn't very well tested yet. I don't want to break your site. Don't in
 
 At this point, the user interface could be a little confusing. A link is being added to the header that links to the parent category's topic list. It would probably be clearer if it linked to a category list for the parent category and it's sub-categories.
 
+Allowing localized categories for anonymous users when the SiteSetting `set_locale_from_accept_language_header` is true
+will currently lead to problems - an endless reload loop. That can be fixed.
+
 Allowing localized categories for anonymous users on sites that are using a CDN will cause problems. A temporary workaround for sites that are using a CDN is to de-select the 'localized categories allow anonymous users' setting on the plugin's settings page.
 
 Loading a new locale requires reloading the site from the server. This could be a problem for mobile users. The plugin's user interface needs to make it clear that clicking on certain links (for example the forum logo) will reload the site.
