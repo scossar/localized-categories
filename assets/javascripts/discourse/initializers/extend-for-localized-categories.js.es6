@@ -49,13 +49,16 @@ function initializePlugin(api) {
   };
 
   api.decorateWidget('home-logo:after', dec => {
-    return dec.h('div.localized-category-link', [
-      dec.h('a', {attributes: {href: '/c/fr'}}, 'french')
-    ]);
+    if (isLocalizedCategory) {
+      let categorySlug = I18n.locale.replace('-', '_').toLowerCase();
+      console.log('slug', categorySlug);
+      return dec.h('div.localized-category-link', [
+        dec.h('a', {attributes: {href: '/c/' + categorySlug}}, `${I18n.t('localized_categories_category_link_text')}`)
+      ]);
+    }
   });
 
   api.decorateWidget('header:after', dec => {
-    console.log('locale', I18n.locale);
     return dec.h('div.loading-screen', [
         dec.h('div.loading-message', `${I18n.t('localized_categories_update_message')}`),
         dec.h('i.fa.fa-globe', {attributes: {'aria-hidden': true}})

@@ -1,3 +1,4 @@
 en:
   js:
     localized_categories_update_message: "Updating the Locale"
+    localized_categories_category_link_text: "All English Categories"
