@@ -3,5 +3,5 @@ plugins:
     default: true
     client: true
   localized_categories_allow_anonymous_users:
-    default: true
+    default: false
     client: true
