@@ -6,8 +6,6 @@
 
 enabled_site_setting :localized_categories_enabled
 
-register_asset 'stylesheets/category-locale.scss'
-
 after_initialize do
 
   module CategoryLocale
