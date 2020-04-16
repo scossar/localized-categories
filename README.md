@@ -1,6 +1,6 @@
 # Discourse Localized Categories
 
-**Note:** this plugin is a work in progress.
+**Note:** this plugin is a work in progress. It could be useful as example code though.
 
 ## Installation
 
