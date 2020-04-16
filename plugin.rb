@@ -8,6 +8,7 @@ enabled_site_setting :localized_categories_enabled
 
 after_initialize do
 
+  # The main issue that needs to be resolved is that changing locales requires the user hard refresh their browser.
   module CategoryLocale
     def set_tmp_locale cat
       if parent_cat_id = cat.parent_category_id
