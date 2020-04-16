@@ -10,6 +10,7 @@ after_initialize do
 
   # The main issue that needs to be resolved is that changing locales requires the user hard refresh their browser.
   # There are also problems with the anonymous cache when the locale is changed.
+  # Ignore these comments if you are reading this code. They should be deleted when I've finished what I'm testing
   module CategoryLocale
     def set_tmp_locale cat
       if parent_cat_id = cat.parent_category_id
